@@ -1,55 +1,39 @@
-//Get all habitcard
-// const getAllHabitCards = async (req, res) => {
-//   db.collection("habitcards")
-//     .find({})
-//     .toArray((err, habitcards) => {
-//       res.json(habitcards);
-//     });
-// };
-
-// //Get habitcard by id
-// const getHabitCardById = async (req, res) => {
-//   const id = req.params.id;
-//   await database
-//     .collection("habitcards")
-//     .findOne({ _id: id }, (err, habitcard) => {
-//       res.json(habitcard);
-//     });
-// };
+const mongoose = require("mongoose");
+const Habitcard = require("../models/Habitcard");
 
 //Create habitcard
-const createHabitCard = async (req, res) => {
-  const habitcard = req.body;
-  try {
-    let database = await connectToDb();
-    let collection = database.collection("habitcards");
-    collection.insertOne(habitcard, (err, result) => {
-      res.json("It all worked");
-    });
-  } catch (err) {
-    console.log(err);
-  }
+const getSample = async (req, res) => {
+  res.json({ message: "Hello World" });
 };
 
-//Update habitcard
-// const updateHabitCard = async (req, res) => {
-//   const id = req.params.id;
-//   const habitcard = req.body;
-//   database
-//     .collection("habitcards")
-//     .updateOne({ _id: id }, { $set: habitcard }, (err, result) => {
-//       res.json(result);
-//     });
-// };
+const createHabitCard = async (req, res) => {
+  const habitcard = new Habitcard({
+    _id: new mongoose.Types.ObjectId(),
+    habits: req.body.habits,
+    rating: req.body.rating,
+  });
 
-// //Delete habitcard
-// const deleteHabitCard = async (req, res) => {
-//   const id = req.params.id;
-//   database.collection("habitcards").deleteOne({ _id: id }, (err, result) => {
-//     res.json(result);
-//   });
-// };
+  habitcard
+    .save()
+    .then((result) => {
+      res.status(201).json({
+        message: "Habitcard created successfully",
+        createdHabitcard: {
+          _id: result._id,
+          habits: result.habits,
+          rating: result.rating,
+          date: result.date,
+        },
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        error: err,
+      });
+    });
+};
 
 module.exports = {
   createHabitCard,
+  getSample,
 };

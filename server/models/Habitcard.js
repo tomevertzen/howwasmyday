@@ -1,18 +1,40 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const Schema = mongoose.Schema;
+
+const habitcardSchema = new Schema(
   {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 3,
+    _id: Schema.ObjectId,
+    habits: [
+      {
+        title: {
+          type: String,
+          required: true,
+        },
+        isPositive: {
+          type: Boolean,
+          required: [true, "Please add a positive or negative habit"],
+        },
+      },
+    ],
+    rating: {
+      type: Number,
+      min: [1, "Rating must be at least 1"],
+      max: [5, "Rating must can not be more than 5"],
+      required: [true, "Rating is required"],
+    },
+    date: {
+      type: Date,
+      default: Date.now,
     },
   },
+
   {
     timestamps: true,
+    collection: "habitcards",
   }
 );
 
-const User = mongoose.model("User", userSchema);
+const Habitcard = mongoose.model("Habitcard", habitcardSchema);
+
+module.exports = Habitcard;
