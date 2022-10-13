@@ -1,5 +1,3 @@
-const { connectToDb } = require("../configs/db.config");
-
 //Get all habitcard
 // const getAllHabitCards = async (req, res) => {
 //   db.collection("habitcards")

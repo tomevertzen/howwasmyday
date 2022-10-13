@@ -1,32 +1,38 @@
-require("dotenv").config({ path: "./config.env" });
+require("dotenv").config({ path: "./.env" });
 const express = require("express");
-const { connectToDb } = require("./configs/db.config");
+const app = express();
+const connectDB = require("../server/configs/db");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
-const habitcardRouter = require("./routes/habitcardRoutes");
-const app = express();
 const PORT = process.env.PORT || 5000;
+
+//Import Routes
+const habitcardRoutes = require("./routes/habitcardRoutes");
+
+//Connect Database
+connectDB();
+const db = mongoose.connection;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+//Serve public folder
 app.use("/", express.static(path.join(__dirname, "/public")));
 
-//First routes
-app.use("/api/habitcards", habitcardRouter);
+//All routes
+app.use("/api/habitcards", habitcardRoutes);
 
-let db;
-
-connectToDb()
-  .then((res) => {
-    db = res;
-
-    app.listen(PORT, () => {
-      console.log(`Server is running on port: ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.log(err);
+db.once("open", () => {
+  console.log("Connected to database");
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+});
 
-module.exports = { db };
+// Log errors on occurence
+
+db.on("error", (err) => {
+  console.log("Error connecting to database", err);
+});
