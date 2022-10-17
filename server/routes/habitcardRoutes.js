@@ -4,24 +4,19 @@ const router = express.Router();
 //import controller functions
 const {
   createHabitCard,
-  getSample,
+  getAllHabitCards,
+  getHabitCardById,
+  addHabitToHabitCardById,
+  deleteHabitCardById,
 } = require("../controllers/habitcardController");
 
-//Get all habitcards route
-// router.get("/", getAllHabitCards);
-
-// //Get habitcard by id route
-// router.get("/:id", getHabitCardById);
+//Get all habitcards
+router.get("/", getAllHabitCards);
 
 //Create habitcard route
 router.post("/create", createHabitCard);
 
-router.get("/", getSample);
-
-// //Update habitcard route
-// router.patch("/update/:id", updateHabitCard);
-
-// //Delete habitcard route
-// router.delete("/delete/:id", deleteHabitCard);
+//Update habitcard route
+router.patch("/addhabittocard/:id", addHabitToHabitCardById);
 
 module.exports = router;

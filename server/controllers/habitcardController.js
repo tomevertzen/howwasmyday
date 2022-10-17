@@ -1,10 +1,45 @@
 const mongoose = require("mongoose");
 const Habitcard = require("../models/Habitcard");
 
-//Create habitcard
-const getSample = async (req, res) => {
-  res.json({ message: "Hello World" });
+//Get all habitcards
+const getAllHabitCards = async (req, res) => {
+  try {
+    const habitcards = await Habitcard.find();
+    res.status(200).json(habitcards);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
 };
+
+//Get habitcard by id
+const getHabitCardById = async (req, res) => {
+  try {
+    const habitcard = await Habitcard.findById(req.params.id);
+    res.status(200).json(habitcard);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+//Update habitcard by id
+const addHabitToHabitCardById = async (req, res) => {
+  try {
+    const habitcard = await Habitcard.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          habits: { title: req.body.title, isPositive: req.body.isPositive },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json(habitcard);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
+//Create habitcard
 
 const createHabitCard = async (req, res) => {
   const habitcard = new Habitcard({
@@ -33,7 +68,20 @@ const createHabitCard = async (req, res) => {
     });
 };
 
+//Delete habitcard by id
+const deleteHabitCardById = async (req, res) => {
+  try {
+    const habitcard = await Habitcard.findByIdAndDelete(req.params.id);
+    res.status(200).json(habitcard);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+};
+
 module.exports = {
+  getAllHabitCards,
+  getHabitCardById,
   createHabitCard,
-  getSample,
+  addHabitToHabitCardById,
+  deleteHabitCardById,
 };
