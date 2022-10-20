@@ -5,9 +5,9 @@ const router = express.Router();
 const {
   createHabitCard,
   getAllHabitCards,
-  getHabitCardById,
   addHabitToHabitCardById,
   deleteHabitCardById,
+  removeHabitFromHabitCardById,
 } = require("../controllers/habitcardController");
 
 //Get all habitcards
@@ -16,7 +16,13 @@ router.get("/", getAllHabitCards);
 //Create habitcard route
 router.post("/create", createHabitCard);
 
-//Update habitcard route
+//Add habit to habitcard
 router.patch("/addhabittocard/:id", addHabitToHabitCardById);
+
+//Remove habit from habitcard
+router.patch("/removehabitfromcard/:id", removeHabitFromHabitCardById);
+
+//Remove habitcard by id
+router.delete("/delete/:id", deleteHabitCardById);
 
 module.exports = router;

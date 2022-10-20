@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const habitListSchema = new Schema({
+const HabitListSchema = new Schema({
   title: {
     type: String,
     required: [true, "Please enter a habit"],
@@ -14,10 +14,10 @@ const habitListSchema = new Schema({
   },
 });
 
-const habitcardSchema = new Schema(
+const HabitcardSchema = new Schema(
   {
     _id: Schema.ObjectId,
-    habits: [habitListSchema],
+    habits: [HabitListSchema],
     rating: {
       type: Number,
       min: [1, "Rating must be at least 1"],
@@ -36,6 +36,6 @@ const habitcardSchema = new Schema(
   }
 );
 
-const Habitcard = mongoose.model("Habitcard", habitcardSchema);
+const Habitcard = mongoose.model("Habitcard", HabitcardSchema);
 
 module.exports = Habitcard;

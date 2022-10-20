@@ -11,29 +11,35 @@ const getAllHabitCards = async (req, res) => {
   }
 };
 
-//Get habitcard by id
-const getHabitCardById = async (req, res) => {
+//Update habit to habitcard by id
+const addHabitToHabitCardById = async (req, res) => {
   try {
-    const habitcard = await Habitcard.findById(req.params.id);
+    const habitcard = await Habitcard.updateOne(
+      { _id: req.params.id },
+      {
+        $addToSet: {
+          habits: { title: req.body.title, isPositive: req.body.isPositive },
+        },
+      },
+      { new: false, runValidators: true }
+    );
     res.status(200).json(habitcard);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
 };
 
-//Update habitcard by id
-const addHabitToHabitCardById = async (req, res) => {
+//Remove habit from habitcard by id
+const removeHabitFromHabitCardById = async (req, res) => {
   try {
-    const habitcard = await Habitcard.findByIdAndUpdate(
-      req.params.id,
-      {
-        $push: {
-          habits: { title: req.body.title, isPositive: req.body.isPositive },
-        },
-      },
-      { new: true, runValidators: true }
+    const habitcard = await Habitcard.updateOne(
+      { _id: req.params.id },
+      { $pull: { habits: { title: req.body.title } } },
+      { new: false, runValidators: true }
     );
-    res.status(200).json(habitcard);
+
+    const newCard = await Habitcard.findById(req.params.id);
+    res.status(200).json(newCard);
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
@@ -80,8 +86,8 @@ const deleteHabitCardById = async (req, res) => {
 
 module.exports = {
   getAllHabitCards,
-  getHabitCardById,
   createHabitCard,
   addHabitToHabitCardById,
   deleteHabitCardById,
+  removeHabitFromHabitCardById,
 };
