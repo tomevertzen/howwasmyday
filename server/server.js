@@ -22,11 +22,9 @@ app.use("/", express.static(path.join(__dirname, "/public")));
 
 //All routes
 const habitcardRoutes = require("./routes/habitcardRoutes");
-const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 
 app.use("/api/habitcards", habitcardRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use(errorHandlerMiddleware);
 

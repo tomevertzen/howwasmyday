@@ -6,6 +6,11 @@ const HabitMonthlySchema = new Schema(
   {
     //This defines the name of the habit
     _id: Schema.ObjectId,
+    user: {
+      type: Schema.ObjectId,
+      ref: "User",
+      required: true,
+    },
     year: {
       type: Number,
       required: [true, "Please enter a year"],
