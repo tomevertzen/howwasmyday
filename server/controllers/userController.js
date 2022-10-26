@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find().select("-password").lean();
@@ -44,7 +45,13 @@ const createNewUser = asyncHandler(async (req, res) => {
   const user = await User.create(userObject);
 
   if (user) {
-    res.status(201).json({ message: "New user has been created" });
+    res.status(201).json({
+      _id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      token: generateToken(user._id),
+    });
   } else {
     res.status(400).json({ message: "Something went wrong" });
   }
@@ -58,13 +65,20 @@ const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email }).lean().exec();
 
+  //Check if user exists
   if (!user) {
     return res.status(400).json({ message: "User does not exist" });
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (isMatch) {
-    res.status(200).json({ message: "Login successful" });
+  //Check if the password is correct
+  if (user && (await bcrypt.compare(password, user.password))) {
+    res.json({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      token: generateToken(user._id),
+    });
   } else {
     res.status(400).json({ message: "Invalid credentials" });
   }
@@ -111,6 +125,13 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Please enter an id" });
   }
 });
+
+//Generate JWT
+
+const generateToken = (id) => {
+  console.log(id);
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+};
 
 module.exports = {
   getAllUsers,
