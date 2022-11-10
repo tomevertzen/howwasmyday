@@ -13,6 +13,10 @@ router
   .patch(usersController.updateUser)
   .delete(usersController.deleteUser);
 
+router.route("/hello").get((req, res) => {
+  res.send("Hello World");
+});
+
 // @route api/users/login
 router.post("/login", usersController.loginUser);
 
