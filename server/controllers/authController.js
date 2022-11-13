@@ -50,7 +50,6 @@ const createNewUser = asyncHandler(async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      token: generateToken(user._id),
     });
   } else {
     res.status(400).json({ message: "Something went wrong" });
@@ -72,12 +71,36 @@ const loginUser = asyncHandler(async (req, res) => {
 
   //Check if the password is correct
   if (user && (await bcrypt.compare(password, user.password))) {
+    //Create JWT's
+    const accessToken = jwt.sign(
+      { userId: user._id, roles: user.roles },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "30s",
+      }
+    );
+
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_TOKEN_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+
+    //Store refresh token in DB
+    await User.findByIdAndUpdate(user._id, { refreshToken });
+
+    //Send tokens to client
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
     res.json({
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      token: generateToken(user._id),
+      accessToken,
     });
   } else {
     res.status(400).json({ message: "Invalid credentials" });
@@ -126,12 +149,43 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-//Generate JWT
+const refresh = async (req, res) => {
+  //Get the refresh token from the request
+  const cookies = req.cookies;
+  const refreshToken = cookies.jwt;
 
-const generateToken = (id) => {
-  console.log(id);
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+  //Check if the refresh token is present
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  //Verify the refresh token and get the user id
+  jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET,
+    asyncHandler(async (err, decoded) => {
+      if (err) return res.status(403).json({ msg: "Forbidden" }); // Forbidden
+
+      //Look for the userID in the DB
+      const user = await User.findOne({ _id: decoded.userId })
+        .select("-password")
+        .exec();
+      if (!user) return res.status(401).json({ msg: "Unauthorized" }); // Unauthorized
+      console.log(user);
+      //Create a new access token and return to the user
+      const accessToken = jwt.sign(
+        { userInfo: { userId: user.id, roles: user.roles } },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "30s",
+        }
+      );
+      res.json({ accessToken });
+    })
+  );
 };
+
+//Generate JWT
 
 module.exports = {
   getAllUsers,
@@ -139,4 +193,5 @@ module.exports = {
   updateUser,
   deleteUser,
   loginUser,
+  refresh,
 };
