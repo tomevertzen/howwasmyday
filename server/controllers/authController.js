@@ -81,7 +81,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id },
+      { userId: user._id, username: user.email },
       process.env.REFRESH_TOKEN_SECRET,
       {
         expiresIn: "1d",
@@ -159,27 +159,78 @@ const refresh = async (req, res) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  //Verify the refresh token and get the user id
+  //Remove the old refresh token from the client
+  res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "none" });
+
+  //Check if the user exists
+  const user = await User.findOne({ refreshToken }).select("-password").exec();
+
+  //If the user does not exist then the refreshToken does not exist anymore
+  // Check to which user the refreshToken (Refresh token container user ID) and delete all refresh tokens for that user
+  if (!user) {
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+      async (err, user) => {
+        //Return Forbidden when token is invalid
+        if (err) return res.status(403).json({ message: "Forbidden" });
+        //Delete all refresh tokens for that user if token is valid (Maybe warn the user?)
+        const hackedUser = await User.findById(decoded.userId);
+        hackedUser.refreshToken = [];
+        await hackedUser.save();
+      }
+    );
+    return res.sendStatus(403);
+  }
+
+  //Make sure the new refreshtoken is not the same as the old one
+  const newRefreshTokenArray = user.refreshToken.filter(
+    (rt) => rt !== refreshToken
+  );
+
   jwt.verify(
     refreshToken,
     process.env.REFRESH_TOKEN_SECRET,
     asyncHandler(async (err, decoded) => {
-      if (err) return res.status(403).json({ msg: "Forbidden" }); // Forbidden
+      if (err) {
+        user.refreshToken = [...newRefreshTokenArray];
+        const result = await user.save();
+      }
 
-      //Look for the userID in the DB
-      const user = await User.findOne({ _id: decoded.userId })
-        .select("-password")
-        .exec();
-      if (!user) return res.status(401).json({ msg: "Unauthorized" }); // Unauthorized
-      console.log(user);
-      //Create a new access token and return to the user
+      if (err || user.email !== decoded.email)
+        return res.status(403).json({ msg: "Forbidden" }); // Forbidden
+
+      //Refresh token was still valid
+      const roles = Object.values(user.roles);
+
+      //Create a new accessToken and refreshToken and return to the user
       const accessToken = jwt.sign(
-        { userInfo: { userId: user.id, roles: user.roles } },
+        { userInfo: { userId: user.id, roles: roles } },
         process.env.ACCESS_TOKEN_SECRET,
         {
           expiresIn: "30s",
         }
       );
+
+      const newRefreshToken = jwt.sign(
+        { userId: user.id, email: user.email },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+          expiresIn: "1d",
+        }
+      );
+
+      //Save the new refresh token to the user
+      user.refreshToken = [...newRefreshTokenArray, newRefreshToken];
+      const result = await user.save();
+
+      res.cookie("jwt", newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
       res.json({ accessToken });
     })
   );

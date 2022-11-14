@@ -4,6 +4,7 @@ module.exports = {
     extend: {
       colors: {
         hworange: "#FDAD13",
+        primary: "#16192C",
       },
     },
   },
