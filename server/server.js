@@ -24,14 +24,13 @@ app.use(errorHandlerMiddleware);
 //Serve public folder
 app.use("/", express.static(path.join(__dirname, "/public")));
 
-//All routes
-const authRoutes = require("./routes/authRoutes");
-const habitcardRoutes = require("./routes/habitcardRoutes");
+//Routes
+app.use("/api/users", require("./routes/authRoutes"));
+app.use("/api/logout", require("./routes/logoutRoutes"));
 
-app.use("/api/users", authRoutes);
-
+//Protected routes
 app.use(verifyJWT);
-app.use("/api/habitcards", habitcardRoutes);
+app.use("/api/habitcards", require("./routes/habitcardRoutes"));
 
 db.once("open", () => {
   console.log("Connected to database");
