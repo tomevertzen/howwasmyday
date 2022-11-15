@@ -5,9 +5,11 @@ import { Link } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SignInSchema } from "../validations/UserSchema";
 import Spinner from "../components/Spinner";
+import useAuthStore from "../app/authStore";
 
 const SignIn = () => {
   const [loading, setLoading] = useState(false);
+  const { token, setToken } = useAuthStore();
 
   const {
     register,
@@ -29,7 +31,8 @@ const SignIn = () => {
       );
 
       if (data) {
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.accessToken);
+        setToken(data.accessToken);
       }
       setLoading(false);
     } catch (error) {
