@@ -5,6 +5,7 @@ const connectDB = require("../server/configs/db");
 const errorHandlerMiddleware = require("../server/middleware/error-handler");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const corsOptions = require("./configs/corsOptions");
 const path = require("path");
 const PORT = process.env.PORT || 5000;
 const verifyJWT = require("./middleware/verifyJWT");
@@ -15,9 +16,9 @@ connectDB();
 const db = mongoose.connection;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(errorHandlerMiddleware);
 

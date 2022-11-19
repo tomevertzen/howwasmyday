@@ -81,7 +81,7 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 
     const refreshToken = jwt.sign(
-      { userId: user._id, username: user.email },
+      { userId: user._id, email: user.email },
       process.env.REFRESH_TOKEN_SECRET,
       {
         expiresIn: "1d",
@@ -91,11 +91,11 @@ const loginUser = asyncHandler(async (req, res) => {
     //Store refresh token in DB
     await User.findByIdAndUpdate(user._id, { refreshToken });
 
-    //Send tokens to client
+    //Send tokens to clientcom
     res.cookie("jwt", refreshToken, {
-      httpOnly: true,
       secure: true,
-      sameSite: "none",
+      httpOnly: true,
+      sameSite: "None",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -154,11 +154,12 @@ const refresh = async (req, res) => {
   const cookies = req.cookies;
   const refreshToken = cookies.jwt;
 
+  console.log(req.cookies);
+
   //Check if the refresh token is present
   if (!refreshToken) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-
   //Remove the old refresh token from the client
   res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "none" });
 
@@ -171,7 +172,7 @@ const refresh = async (req, res) => {
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET,
-      async (err, user) => {
+      async (err, decoded) => {
         //Return Forbidden when token is invalid
         if (err) return res.status(403).json({ message: "Forbidden" });
         //Delete all refresh tokens for that user if token is valid (Maybe warn the user?)
@@ -225,9 +226,9 @@ const refresh = async (req, res) => {
       const result = await user.save();
 
       res.cookie("jwt", newRefreshToken, {
-        httpOnly: true,
         secure: true,
-        sameSite: "none",
+        httpOnly: true,
+        sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
       });
 

@@ -6,10 +6,16 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { SignInSchema } from "../validations/UserSchema";
 import Spinner from "../components/Spinner";
 import useAuthStore from "../app/authStore";
+import refresh from "../hooks/useRefreshToken";
+import useAuth from "../hooks/useAuth";
 
 const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const { token, setToken } = useAuthStore();
+
+  const authStore = useAuth();
+
+  console.log(authStore.token);
 
   const {
     register,
@@ -25,8 +31,13 @@ const SignIn = () => {
     try {
       const { data } = await axios.post(
         "http://localhost:5000/api/users/signin",
+
         {
           ...formValues,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
         }
       );
 
@@ -40,6 +51,23 @@ const SignIn = () => {
       setLoading(false);
     }
   };
+
+  // const axiosCall = axios.create({
+  //   baseURL: "http://localhost:5000/api/users/refresh",
+  //   headers: {
+  //     Authorization: `Bearer ${token}`,
+  //   },
+  //   withCredentials: true,
+  // });
+
+  // const refresh = async () => {
+  //   try {
+  //     const data = await refresh();
+  //     console.log(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   return (
     <div className="w-full h-screen bg-white flex flex-col sm:items-center md:justify-center text-primary">
@@ -94,6 +122,14 @@ const SignIn = () => {
         </div>
       </div>
 
+      <button
+        className="border border-black p-2 bg-red-200"
+        onClick={() => {
+          refresh();
+        }}
+      >
+        Refresh
+      </button>
       <div className="flex justify-center  mt-2 md:mt-10 text-sm md:text-base">
         <p className="inline-block mb-10">Don't have an account yet? </p>
         <Link

@@ -12,7 +12,7 @@ const handleLogout = async (req, res) => {
 
   //If the refreshToken is no longer in the database just remove the token from the client
   if (!user) {
-    res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "none" });
+    res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "None" });
     return res.status(204);
   }
 
@@ -23,7 +23,7 @@ const handleLogout = async (req, res) => {
 
   await user.save();
 
-  res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "none" });
+  res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "None" });
   res.status(204);
 };
 
