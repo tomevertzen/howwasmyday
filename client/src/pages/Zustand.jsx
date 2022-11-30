@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import useTryoutStore from "../app/tryoutStore";
-import useRefreshToken from "../hooks/useRefreshToken";
 
 const Zustand = () => {
   const [addInput, setAddInput] = useState("");
