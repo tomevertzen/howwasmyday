@@ -4,13 +4,11 @@ import useRefreshToken from "./useRefreshToken";
 import useAuthStore from "../app/authStore";
 
 const useAxiosPrivate = () => {
-  const refresh = useRefreshToken();
 
-  //   useEffect(() => {
-  //     const responseIntercept = axiosPrivate.interceptors.response.use();
+    useEffect(() => {
+        const responseIntercept = axiosPrivate.interceptors.response.use()
 
-  //     return axiosPrivate;
-  //   }, []);
-};
+    return axiosPrivate;
+},[]);
 
 export default useAxiosPrivate;

@@ -5,9 +5,8 @@ const useRefreshToken = () => {
   //Retrieve the function to set the new token accessToken
   const authStore = useAuthStore();
 
-  //Call the refresh token endpoints
   const refresh = async () => {
-    const response = await axios.get("/users/refresh", {
+    const response = await axios.get("/refresh", {
       withCredentials: true,
     });
     console.log(authStore);

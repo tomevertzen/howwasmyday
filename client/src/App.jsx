@@ -20,8 +20,9 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
-        <Route element={<PrivateRoutes />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<PrivateRoutes allowedRoles={[2001]} />}>
+          <Route path="/dashboard/*" element={<Dashboard />} />
+
           <Route path="/profile" element={<Profile />} />
         </Route>
 

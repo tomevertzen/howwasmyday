@@ -1,17 +1,14 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SignInSchema } from "../validations/UserSchema";
 import Spinner from "../components/Spinner";
 import useAuthStore from "../app/authStore";
-import refresh from "../hooks/useRefreshToken";
-import useAuth from "../hooks/useAuth";
 
 const SignIn = () => {
   const [loading, setLoading] = useState(false);
-  const { token, setToken } = useAuthStore();
 
   //Create form with react-hook-form
   const {
@@ -40,10 +37,14 @@ const SignIn = () => {
       );
 
       if (data) {
-        localStorage.setItem("token", data.accessToken);
-        setToken(data.accessToken);
+        localStorage.setItem("accessToken", data.accessToken);
+        console.log(data);
+        authStore.setToken(data.accessToken);
+        authStore.setUser(data.user);
+        authStore.setRoles(data.roles);
       }
       setLoading(false);
+      // navigate(from, { replace: true });
     } catch (error) {
       console.log(error);
       setLoading(false);
