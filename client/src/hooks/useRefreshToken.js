@@ -1,18 +1,17 @@
 import axios from "../api/axios";
-import useAuth from "./useAuth";
+import useAuthStore from "../app/authStore";
 
 const useRefreshToken = () => {
   //Retrieve the function to set the new token accessToken
-  const authStore = useAuth();
+  const authStore = useAuthStore();
 
   //Call the refresh token endpoints
   const refresh = async () => {
     const response = await axios.get("/users/refresh", {
       withCredentials: true,
     });
-
     console.log(authStore);
-    return response.data.accessToken;
+    //Set the new token accessToken
   };
   return refresh;
 };

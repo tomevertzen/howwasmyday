@@ -13,10 +13,7 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const { token, setToken } = useAuthStore();
 
-  const authStore = useAuth();
-
-  console.log(authStore.token);
-
+  //Create form with react-hook-form
   const {
     register,
     control,
@@ -26,6 +23,7 @@ const SignIn = () => {
     resolver: yupResolver(SignInSchema),
   });
 
+  //Handle login functionality
   const onSubmit = async (formValues) => {
     setLoading(true);
     try {
@@ -52,22 +50,11 @@ const SignIn = () => {
     }
   };
 
-  // const axiosCall = axios.create({
-  //   baseURL: "http://localhost:5000/api/users/refresh",
-  //   headers: {
-  //     Authorization: `Bearer ${token}`,
-  //   },
-  //   withCredentials: true,
-  // });
-
-  // const refresh = async () => {
-  //   try {
-  //     const data = await refresh();
-  //     console.log(data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
+  const getRefreshToken = async () => {
+    const token = await refresh();
+    console.log(token);
+    setToken(token);
+  };
 
   return (
     <div className="w-full h-screen bg-white flex flex-col sm:items-center md:justify-center text-primary">
@@ -124,9 +111,7 @@ const SignIn = () => {
 
       <button
         className="border border-black p-2 bg-red-200"
-        onClick={() => {
-          refresh();
-        }}
+        onClick={getRefreshToken}
       >
         Refresh
       </button>
